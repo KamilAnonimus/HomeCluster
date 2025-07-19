@@ -84,6 +84,34 @@ resource "yandex_vpc_security_group" "nat-instance-sg" {
   }
 
   ingress {
+    protocol       = "TCP"
+    description    = "BGP"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    port           = 179
+  }
+
+    ingress {
+    protocol       = "UDP"
+    description    = "BGP"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    port           = 179
+  }
+
+    ingress {
+    protocol       = "UDP"
+    description    = "VXLAN"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    port           = 4789
+  }
+
+    ingress {
+    protocol       = "TCP"
+    description    = "Kubernetes API"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    port           = 6443
+  }
+
+  ingress {
     protocol       = "ICMP"
     description    = "Allow ping within VPC"
     v4_cidr_blocks = ["192.168.0.0/16"]
@@ -157,7 +185,7 @@ users:
     sudo: 'ALL=(ALL) NOPASSWD:ALL'
     ssh_authorized_keys:
       - ${file(var.ssh_key_path)}
-hostname: workerNode2
+hostname: workerNode1
 EOF
 }
 }
@@ -191,7 +219,7 @@ users:
     sudo: 'ALL=(ALL) NOPASSWD:ALL'
     ssh_authorized_keys:
       - ${file(var.ssh_key_path)}
-hostname: workerNode1
+hostname: workerNode2
 EOF
 }
 }
