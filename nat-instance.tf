@@ -111,6 +111,12 @@ resource "yandex_vpc_security_group" "nat-instance-sg" {
     port           = 6443
   }
 
+    ingress {
+    protocol       = "TCP"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    port           = 3389
+  }
+
   ingress {
     protocol       = "ICMP"
     description    = "Allow ping within VPC"
