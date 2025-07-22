@@ -5,35 +5,18 @@ metadata:
   namespace: argocd
 spec:
   project: default
-
-  # Источник: официальный Helm‑репозиторий prometheus-community
   source:
     repoURL: https://prometheus-community.github.io/helm-charts
     chart: prometheus
-    # Можно указать конкретную версию чарта, например "17.0.0"
     targetRevision: latest
     helm:
-      # Переопределяем значения чарта при необходимости
-      values: |
-        server:
-          persistentVolume:
-            enabled: true
-            # storageClass: local-path
-            size: 8Gi
-        alertmanager:
-          persistentVolume:
-            enabled: true
-            size: 2Gi
-
-  # Куда деплоить
+      releaseName: prometheus
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
-
-  # Автоматический синхрон и самоуправление (опционально)
+  # Автоматический синхрон и самоуправление
   syncPolicy:
     automated:
       prune: true        # удалять ресурсы, не описанные в манифесте
-      selfHeal: true     # исправлять вручную изменённые ресурсы
     syncOptions:
       - CreateNamespace=true  # автоматически создавать namespace monitoring
