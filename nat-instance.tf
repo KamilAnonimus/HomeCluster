@@ -62,32 +62,14 @@ resource "yandex_vpc_security_group" "nat-instance-sg" {
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
 
-  ingress {
-    protocol       = "TCP"
-    description    = "ssh"
-    v4_cidr_blocks = ["0.0.0.0/0"]
-    port           = 22
-  }
-
-  ingress {
-    protocol       = "TCP"
-    description    = "ext-http"
-    v4_cidr_blocks = ["0.0.0.0/0"]
-    port           = 80
-  }
-
-  ingress {
-    protocol       = "TCP"
-    description    = "ext-https"
-    v4_cidr_blocks = ["0.0.0.0/0"]
-    port           = 443
-  }
-
-  ingress {
-    protocol       = "TCP"
-    description    = "BGP"
-    v4_cidr_blocks = ["0.0.0.0/0"]
-    port           = 179
+  dynamic "ingress" {
+    for_each = ["22","80","443","179","4789","6443","3389"]
+    content {
+      from_port = ingress.value
+      to_port = ingress.value
+      protocol = "TCP"
+      v4_cidr_blocks = ["0.0.0.0/0"]
+    }
   }
 
     ingress {
@@ -102,19 +84,6 @@ resource "yandex_vpc_security_group" "nat-instance-sg" {
     description    = "VXLAN"
     v4_cidr_blocks = ["0.0.0.0/0"]
     port           = 4789
-  }
-
-    ingress {
-    protocol       = "TCP"
-    description    = "Kubernetes API"
-    v4_cidr_blocks = ["0.0.0.0/0"]
-    port           = 6443
-  }
-
-    ingress {
-    protocol       = "TCP"
-    v4_cidr_blocks = ["0.0.0.0/0"]
-    port           = 3389
   }
 
   ingress {
@@ -166,10 +135,11 @@ resource "yandex_compute_instance" "workerNode1" {
   name        = "worker1"
   platform_id = "standard-v3"
   zone        = "ru-central1-a"
+  allow_stopping_for_update = true
 
   resources {
-    cores         = 2
-    memory        = 2
+    cores         = 4
+    memory        = 8
   }
 
   boot_disk {
@@ -272,7 +242,7 @@ EOF
 
 resource "yandex_vpc_route_table" "nat-instance-route" {
   name       = "nat-instance-route"
-  network_id = yandex_vpc_network.my-vpc.id
+  network_id = yandex_vpc_network.my-vpc.ido
   static_route {
     destination_prefix = "0.0.0.0/0"
     next_hop_address   = yandex_compute_instance.nat-instance.network_interface.0.ip_address
